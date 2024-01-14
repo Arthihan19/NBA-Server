@@ -1,10 +1,11 @@
 class IUserService {
-    getById(id) {}
-    getByEmail(email) {}
-    signUp(userData) {}
-    signIn(email, password) {}
-    updateUser(id, userData) {}
-    deleteUser(id) {}
+    createUser(userData) {}
+
+    findByUsername(username) {}
+
+    saveRefreshToken(userId, refreshToken) {}
+
+    findByRefreshToken(refreshToken) {}
 }
 
 module.exports = IUserService;

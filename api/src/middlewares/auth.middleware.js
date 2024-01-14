@@ -1,8 +1,8 @@
 const UserRepository = require('../repositories/user.repository');
 const userRepository = new UserRepository();
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'my-secret-key';
+const REFRESH_SECRET_KEY = 'my-refresh-secret-key';
 
 async function authToken(req, res, next) {
     const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
@@ -21,23 +21,32 @@ async function authToken(req, res, next) {
     }
 }
 
-async function generateToken(username, password) {
-    const user = await userRepository.findByUsername(username);
+function generateToken(user) {
+    const accessToken = jwt.sign({ id: user.userId, username: user.username }, SECRET_KEY, { expiresIn: '15m' });
+    const refreshToken = jwt.sign({ id: user.userId, username: user.username }, REFRESH_SECRET_KEY, { expiresIn: '7d' });
 
-    // Check if user exists and if the password matches
-    if (!user || !await bcrypt.compare(password, user.password)) {
-        throw new Error('Invalid Authentication Credentials');
-    }
-
-    const tokenPayload = {
-        id: user.userId,
-        username: user.username
-    };
-
-    return jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '1h' });
+    return { accessToken, refreshToken };
 }
+
+async function refreshAccessToken(refreshToken) {
+    try {
+        jwt.verify(refreshToken, REFRESH_SECRET_KEY);
+
+        const user = await userRepository.findByRefreshToken(refreshToken);
+
+        if (!user) {
+            throw new Error('Invalid refresh token');
+        }
+
+        return jwt.sign({ id: user.userId, username: user.username }, SECRET_KEY, { expiresIn: '15m' });
+    } catch (error) {
+        throw new Error('Failed to refresh token: ' + error.message);
+    }
+}
+
 
 module.exports = {
     authToken,
-    generateToken
+    generateToken,
+    refreshAccessToken
 };

@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-    connectionString: 'postgres://postgres:postgres@localhost:5432/todo',
+    connectionString: 'postgres://postgres:postgres@localhost:5432/NBA',
 });
 
 pool.on('error', (err, client) => {
