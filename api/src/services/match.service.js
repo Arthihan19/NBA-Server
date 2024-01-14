@@ -1,12 +1,8 @@
 const APIError = require('../errors/api.error');
-const IMatchService = require("../interfaces/IMatchService");
 
-class MatchService extends IMatchService {
-    constructor(matchRepository) {
-        super();
-        this.matchRepository = matchRepository;
-    }
+const MatchRepository = require('../repositories/match.repository');
 
+class MatchService {
     /**
      * Gets the schedule with optional filtering and pagination.
      *
@@ -19,11 +15,11 @@ class MatchService extends IMatchService {
      */
     async getSchedule({ beforeDate, afterDate, page, pageSize, teamName, gameId } = {}) {
         try {
-            return await this.matchRepository.findAll({ beforeDate, afterDate, page, pageSize, teamName, gameId });
+            return await MatchRepository.findAll({ beforeDate, afterDate, page, pageSize, teamName, gameId });
         } catch (error) {
             throw new APIError('Error fetching schedule: ' + error.message);
         }
     }
 }
 
-module.exports = MatchService;
+module.exports = new MatchService();

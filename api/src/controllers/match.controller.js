@@ -1,8 +1,6 @@
-class MatchController {
-    constructor(MatchService) {
-        this.MatchService = MatchService;
-    }
+const MatchService = require('../services/match.service');
 
+class MatchController {
     asyncWrapper(fn) {
         return (req, res, next) => {
             fn(req, res, next).catch(next);
@@ -17,7 +15,7 @@ class MatchController {
         const parsedPage = page ? parseInt(page, 10) : undefined;
         const parsedPageSize = pageSize ? Math.min(parseInt(pageSize, 10), 100) : undefined;
 
-        const schedule = await this.MatchService.getSchedule({
+        const schedule = await MatchService.getSchedule({
             beforeDate: parsedBeforeDate,
             afterDate: parsedAfterDate,
             page: parsedPage,
@@ -30,4 +28,4 @@ class MatchController {
     });
 }
 
-module.exports = MatchController;
+module.exports = new MatchController();

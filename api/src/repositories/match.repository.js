@@ -1,4 +1,3 @@
-const IMatchRepository = require("../interfaces/IMatchRepository");
 const Match = require("../models/match.model");
 const axios = require('axios');
 
@@ -27,7 +26,7 @@ const mapRowToMatch = (row, odds = {teamOneOdds: null, teamTwoOdds: null}) => {
     });
 };
 
-class MatchRepository extends IMatchRepository {
+class MatchRepository {
     async fetchOdds() {
         try {
             const response = await axios.get('https://cdn.nba.com/static/json/liveData/odds/odds_todaysGames.json');
@@ -66,4 +65,4 @@ class MatchRepository extends IMatchRepository {
     }
 }
 
-module.exports = MatchRepository;
+module.exports = new MatchRepository();

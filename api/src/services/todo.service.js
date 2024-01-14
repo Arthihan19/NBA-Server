@@ -1,18 +1,14 @@
 const APIError = require('../errors/api.error');
-const ITodoService = require('../interfaces/ITodoService');
 
-class TodoService extends ITodoService {
-    constructor(todoRepository) {
-        super();
-        this.todoRepository = todoRepository;
-    }
+const TodoRepository = require('../repositories/todo.repository');
 
+class TodoService {
     async getAllTodos(userId) {
-        return await this.todoRepository.findAll(userId);
+        return await TodoRepository.findAll(userId);
     }
 
     async getTodoById(id, userId) {
-        const todo = await this.todoRepository.findById(id, userId);
+        const todo = await TodoRepository.findById(id, userId);
         if (!todo) {
             throw new APIError(404, 'Todo not found');
         }
@@ -20,7 +16,7 @@ class TodoService extends ITodoService {
     }
 
     async createTodo(todoData, userId) {
-        return this.todoRepository.create(todoData, userId);
+        return TodoRepository.create(todoData, userId);
     }
 
     async updateTodo(id, todoData, userId) {
@@ -28,7 +24,7 @@ class TodoService extends ITodoService {
         if (!existingTodo) {
             throw new APIError(404, 'Todo not found');
         }
-        return this.todoRepository.update(id, todoData, userId);
+        return TodoRepository.update(id, todoData, userId);
     }
 
     async deleteTodo(id, userId) {
@@ -36,8 +32,8 @@ class TodoService extends ITodoService {
         if (!todo) {
             throw new APIError(404, 'Todo not found');
         }
-        return this.todoRepository.delete(id, userId);
+        return TodoRepository.delete(id, userId);
     }
 }
 
-module.exports = TodoService;
+module.exports = new TodoService();

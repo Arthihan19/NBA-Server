@@ -1,12 +1,14 @@
+// auth.router.js
+
 const express = require('express');
 const authRouter = express.Router();
 
-module.exports = function(authControllerInstance) {
-    authRouter.post('/signup', authControllerInstance.signUp)
+const AuthController = require('../controllers/auth.controller');
 
-    authRouter.post('/signin', authControllerInstance.signIn);
-
-    authRouter.post('/refresh-token', authControllerInstance.refreshToken);
+module.exports = function() {
+    authRouter.post('/signup', AuthController.signUp);
+    authRouter.post('/signin', AuthController.signIn);
+    authRouter.post('/refresh-token', AuthController.refreshToken);
 
     return authRouter;
 };

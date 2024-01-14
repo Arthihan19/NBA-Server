@@ -1,7 +1,5 @@
 const bcrypt = require('bcrypt');
-
 const db = require('../config/db.config');
-const IUserRepository = require('../interfaces/IUserRepository');
 
 /**
  * @typedef {Object} UserRow
@@ -33,7 +31,7 @@ const mapRowToUser = (row) => {
     };
 }
 
-class UserRepository extends IUserRepository {
+class UserRepository {
 
     async saveRefreshToken(userId, refreshToken) {
         try {

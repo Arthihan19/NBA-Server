@@ -1,16 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-const index = require('./routes/index');
 const errorHandler = require('./middlewares/error-handler.middleware');
 
-const MatchRepository = require('./repositories/match.repository');
-const MatchService = require('./services/match.service');
-const MatchController = require('./controllers/match.controller');
+const index = require('./routes/index');
 const matchRouter = require("./routes/match.router");
-
-const UserRepository = require('./repositories/user.repository');
-const UserService = require('./services/user.service');
-const AuthController = require('./controllers/auth.controller');
 const authRouter = require("./routes/auth.router");
 
 const app = express();
@@ -22,24 +15,13 @@ let corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
-app.use(express.urlencoded({extended: true}))
-
-const matchRepositoryInstance = new MatchRepository();
-const matchServiceInstance = new MatchService(matchRepositoryInstance);
-const matchControllerInstance = new MatchController(matchServiceInstance);
-
-const userRepositoryInstance = new UserRepository();
-const userServiceInstance = new UserService(userRepositoryInstance);
-const authControllerInstance = new AuthController(userServiceInstance);
+app.use(express.urlencoded({extended: true}));
 
 // Public routes
 app.use(index);
 
-app.use("/api/auth", authRouter(authControllerInstance));
-
-
-// app.use("/api", authToken, todoRouter(todoControllerInstance));
-app.use("/api", matchRouter(matchControllerInstance));
+app.use("/api/auth", authRouter());
+app.use("/api/schedule", matchRouter());
 
 app.use(errorHandler);
 

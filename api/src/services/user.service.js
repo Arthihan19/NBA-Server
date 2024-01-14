@@ -1,10 +1,8 @@
 const UserRepository = require('../repositories/user.repository');
-const IUserService = require('../interfaces/IUserService');
 
-class UserService extends IUserService {
-    constructor(userRepository) {
-        super();
-        this.userRepository = userRepository;
+class UserService {
+    constructor() {
+        this.userRepository = new UserRepository();
     }
 
     async createUser(userData) {
@@ -29,4 +27,4 @@ class UserService extends IUserService {
     }
 }
 
-module.exports = UserService;
+module.exports = new UserService();

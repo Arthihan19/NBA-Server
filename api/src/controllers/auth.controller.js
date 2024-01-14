@@ -1,11 +1,9 @@
 const bcrypt = require('bcryptjs');
+
+const UserService = require('../services/user.service');
 const { generateToken, refreshAccessToken} = require('../middlewares/auth.middleware');
 
 class AuthController {
-    constructor(userService) {
-        this.userService = userService;
-    }
-
     asyncWrapper(fn) {
         return (req, res, next) => {
             fn(req, res, next).catch(next);
@@ -23,17 +21,17 @@ class AuthController {
             return res.status(400).send({ message: "Password must be between 6 and 40 characters" });
         }
 
-        const usernameExists = await this.userService.doesUsernameExist(username);
+        const usernameExists = await UserService.doesUsernameExist(username);
         if (usernameExists) {
             return res.status(400).send({ message: "Username is already taken" });
         }
 
-        const user = await this.userService.createUser({ username, password });
+        const user = await UserService.createUser({ username, password });
         res.status(201).send({ message: "User registered successfully!" });
     });
 
     signIn = this.asyncWrapper(async (req, res) => {
-        const user = await this.userService.findByUsername(req.body.username);
+        const user = await UserService.findByUsername(req.body.username);
         if (!user) {
             return res.status(401).send({ message: "Invalid Credentials" });
         }
@@ -45,7 +43,7 @@ class AuthController {
 
         const { accessToken, refreshToken } = generateToken(user);
 
-        await this.userService.saveRefreshToken(user.userId, refreshToken);
+        await UserService.saveRefreshToken(user.userId, refreshToken);
 
         res.status(200).send({
             id: user.userId,
@@ -69,4 +67,4 @@ class AuthController {
     });
 }
 
-module.exports = AuthController;
+module.exports = new AuthController();

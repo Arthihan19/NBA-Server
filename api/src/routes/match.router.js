@@ -1,8 +1,10 @@
 const express = require('express');
 const matchRouter = express.Router();
 
-module.exports = function(matchControllerInstance) {
-    matchRouter.get("/schedule", matchControllerInstance.getSchedule);
+const MatchController = require('../controllers/match.controller');
+
+module.exports = function() {
+    matchRouter.get("/", MatchController.getSchedule);
 
     return matchRouter;
 };

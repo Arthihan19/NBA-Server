@@ -1,5 +1,4 @@
 const UserRepository = require('../repositories/user.repository');
-const userRepository = new UserRepository();
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'my-secret-key';
 const REFRESH_SECRET_KEY = 'my-refresh-secret-key';
@@ -32,7 +31,7 @@ async function refreshAccessToken(refreshToken) {
     try {
         jwt.verify(refreshToken, REFRESH_SECRET_KEY);
 
-        const user = await userRepository.findByRefreshToken(refreshToken);
+        const user = await UserRepository.findByRefreshToken(refreshToken);
 
         if (!user) {
             throw new Error('Invalid refresh token');
