@@ -18,7 +18,13 @@ class UserService {
     }
 
     async findByRefreshToken(refreshToken) {
-        return await this.userRepository.findByRefreshToken(refreshToken);
+        const user = await this.userRepository.findByRefreshToken(refreshToken);
+
+        if (!user) {
+            throw new Error('Invalid refresh token');
+        }
+
+        return user;
     }
 
     async doesUsernameExist(username) {

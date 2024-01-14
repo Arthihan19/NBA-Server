@@ -27,7 +27,15 @@ class AuthController {
         }
 
         const user = await UserService.createUser({ username, password });
-        res.status(201).send({ message: "User registered successfully!" });
+
+        const { accessToken, refreshToken } = generateToken(user);
+
+        await UserService.saveRefreshToken(user.userId, refreshToken);
+
+        res.cookie('accessToken', accessToken, { httpOnly: true, sameSite: 'strict' });
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'strict' });
+
+        res.status(201).send({ message: "User registered successfully!", id: user.userId, username });
     });
 
     signIn = this.asyncWrapper(async (req, res) => {
@@ -45,24 +53,22 @@ class AuthController {
 
         await UserService.saveRefreshToken(user.userId, refreshToken);
 
-        res.status(200).send({
-            id: user.userId,
-            username: user.username,
-            accessToken,
-            refreshToken
-        });
+        res.cookie('accessToken', accessToken, { httpOnly: true, sameSite: 'strict' });
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'strict' });
+
+        res.status(200).send({ id: user.userId, username: user.username });
     });
 
     refreshToken = this.asyncWrapper(async (req, res) => {
         try {
-            const {refreshToken} = req.body;
-
+            const refreshToken = req.cookies['refreshToken'];
             const newAccessToken = await refreshAccessToken(refreshToken);
 
-            res.status(200).send({accessToken: newAccessToken});
+            res.cookie('accessToken', newAccessToken, { httpOnly: true, sameSite: 'strict' });
+            res.status(200).send({ accessToken: newAccessToken });
 
         } catch (error) {
-            res.status(401).send({message: 'Invalid refresh token'});
+            res.status(401).send({ message: 'Invalid refresh token' });
         }
     });
 }

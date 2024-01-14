@@ -1,22 +1,40 @@
-const UserRepository = require('../repositories/user.repository');
+const UserService = require('../services/user.service');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'my-secret-key';
 const REFRESH_SECRET_KEY = 'my-refresh-secret-key';
 
 async function authToken(req, res, next) {
-    const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+    const accessToken = req.cookies['accessToken'];
+    const refreshToken = req.cookies['refreshToken'];
 
-    if (!token) {
+    if (!accessToken && !refreshToken) {
         return res.status(401).send('Missing Authorization Token');
     }
 
     try {
-        const decodedToken = jwt.verify(token, SECRET_KEY);
-
-        req.user = { id: decodedToken.id, username: decodedToken.username };
-        next();
+        if (accessToken) {
+            const decodedToken = jwt.verify(accessToken, SECRET_KEY);
+            req.user = { id: decodedToken.id, username: decodedToken.username };
+            return next();
+        }
     } catch (error) {
-        return res.status(401).send('Invalid Token');
+        console.log('Access token invalid, trying to refresh:', error.message);
+    }
+
+    if (refreshToken) {
+        try {
+            const newAccessToken = await refreshAccessToken(refreshToken);
+
+            res.cookie('accessToken', newAccessToken, { httpOnly: true, sameSite: 'strict' });
+            const decodedToken = jwt.verify(newAccessToken, SECRET_KEY);
+            req.user = { id: decodedToken.id, username: decodedToken.username };
+            return next();
+        } catch (refreshError) {
+            console.log('Failed to refresh token:', refreshError.message);
+            return res.status(401).send('Invalid Refresh Token');
+        }
+    } else {
+        return res.status(401).send('Refresh Token Not Provided');
     }
 }
 
@@ -31,12 +49,7 @@ async function refreshAccessToken(refreshToken) {
     try {
         jwt.verify(refreshToken, REFRESH_SECRET_KEY);
 
-        const user = await UserRepository.findByRefreshToken(refreshToken);
-
-        if (!user) {
-            throw new Error('Invalid refresh token');
-        }
-
+        const user = await UserService.findByRefreshToken(refreshToken);
         return jwt.sign({ id: user.userId, username: user.username }, SECRET_KEY, { expiresIn: '15m' });
     } catch (error) {
         throw new Error('Failed to refresh token: ' + error.message);
