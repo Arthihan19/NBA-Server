@@ -88,6 +88,23 @@ class BetRepository {
         }
     }
 
+    async findBetsByState(state) {
+        try {
+            const result = await db.query('SELECT * FROM bets WHERE state = $1', [state]);
+            return result.rows.map(mapRowToBet);
+        } catch (error) {
+            throw new APIError(500, 'Error fetching bets by state: ' + error.message);
+        }
+    }
+
+    async updateBetState(betId, state) {
+        try {
+            const result = await db.query('UPDATE bets SET state = $1 WHERE id = $2 RETURNING *', [state, betId]);
+            return result.rows && result.rows.length ? mapRowToBet(result.rows[0]) : null;
+        } catch (error) {
+            throw new APIError(500, 'Error updating bet state: ' + error.message);
+        }
+    }
 }
 
 module.exports = new BetRepository();

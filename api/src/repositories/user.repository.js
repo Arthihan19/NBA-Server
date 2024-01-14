@@ -50,7 +50,7 @@ class UserRepository {
         }
     }
 
-    async createUser({ username, password }) {
+    async createUser({username, password}) {
         try {
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
@@ -86,6 +86,22 @@ class UserRepository {
     async updateCurrency(userId, currency) {
         try {
             await db.query('UPDATE users SET currency = $1 WHERE userId = $2', [currency, userId]);
+        } catch (error) {
+            throw new Error('Error updating user currency: ' + error.message);
+        }
+    }
+
+    async updateUserAfterBet(userId, winnings, betWon) {
+        try {
+            const user = await this.findById(userId);
+            const currency = user.currency;
+            if (betWon) {
+                const newCurrency = currency + winnings;
+                await db.query('UPDATE users SET currency = $1, bets_won = bets_won + 1 WHERE userId = $2', [newCurrency, userId]);
+            } else {
+                const newCurrency = currency - winnings;
+                await db.query('UPDATE users SET currency = $1, bets_lost = bets_lost + 1 WHERE userId = $2', [newCurrency, userId]);
+            }
         } catch (error) {
             throw new Error('Error updating user currency: ' + error.message);
         }
