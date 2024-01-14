@@ -14,9 +14,6 @@ async function authToken(req, res, next) {
     try {
         const decodedToken = jwt.verify(token, SECRET_KEY);
 
-        console.log(decodedToken)
-
-        // attach user object to request for further usage
         req.user = { id: decodedToken.id, username: decodedToken.username };
         next();
     } catch (error) {
@@ -37,7 +34,7 @@ async function generateToken(username, password) {
         username: user.username
     };
 
-    return jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '1h' }); // token expires in 1 hour
+    return jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '1h' });
 }
 
 module.exports = {

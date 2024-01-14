@@ -1,5 +1,6 @@
 const db = require('../config/db.config');
 const Todo = require('../models/todo.model');
+const ITodoRepository = require("../interfaces/ITodoRepository");
 
 /**
  * @typedef {Object} TodoRow
@@ -27,7 +28,7 @@ const mapRowToTodo = (row) => {
     });
 };
 
-class TodoRepository {
+class TodoRepository extends ITodoRepository {
     async findAll(userId) {
         try {
             const result = await db.query('SELECT * FROM todos WHERE userId = $1', [userId]);

@@ -4,7 +4,8 @@ const errorHandler = (err, req, res, next) => {
     if (err instanceof APIError) {
         return res.status(err.statusCode).json({ error: err.message });
     }
-    console.error(err); // You can log the error details here for debugging.
+    
+    console.error(err);
     return res.status(500).json({ error: 'Unexpected server error' });
 };
 
