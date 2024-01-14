@@ -71,6 +71,12 @@ class AuthController {
             res.status(401).send({ message: 'Invalid refresh token' });
         }
     });
+
+    getMe = this.asyncWrapper(async (req, res) => {
+        const userId = req.user.id;
+        const userDetails = await UserService.getUserDetails(userId);
+        res.status(200).json(userDetails);
+    });
 }
 
 module.exports = new AuthController();

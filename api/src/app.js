@@ -6,7 +6,7 @@ const errorHandler = require('./middlewares/error-handler.middleware');
 const index = require('./routes/index');
 const matchRouter = require("./routes/match.router");
 const authRouter = require("./routes/auth.router");
-const {authToken} = require("./middlewares/auth.middleware");
+const betRoutes = require('./routes/bet.router');
 
 const app = express();
 
@@ -24,7 +24,9 @@ app.use(express.urlencoded({extended: true}));
 app.use(index);
 
 app.use("/api/auth", authRouter());
-app.use("/api/schedule", authToken, matchRouter());
+app.use("/api/schedule", matchRouter());
+app.use('/api/bets', betRoutes());
+
 
 app.use(errorHandler);
 

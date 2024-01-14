@@ -5,5 +5,6 @@ DB_HOST="localhost"
 DB_PORT="5432"
 
 PGPASSWORD=$DB_PASS psql -h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT -a -f ../../sql/users.sql
+PGPASSWORD=$DB_PASS psql -h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT -a -f ../../sql/bets.sql
 
 echo "Test data inserted."

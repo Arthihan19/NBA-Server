@@ -1,26 +1,14 @@
 const Match = require("../models/match.model");
 const axios = require('axios');
 
-/**
- * @typedef {Object} MatchRow
- * @property {number} id
- * @property {string} teamOne
- * @property {string} teamTwo
- * @property {Date} matchDate
- */
-
-/**
- * Maps a row from the json response to a Match object.
- *
- * @param {MatchRow} row
- * @param {Object} odds
- */
 const mapRowToMatch = (row, odds = {teamOneOdds: null, teamTwoOdds: null}) => {
     return new Match({
         id: row.gameId,
         teamOne: row.homeTeam.teamName,
+        teamOneId: row.homeTeam.teamId,
         teamOneOdds: odds.teamOneOdds,
         teamTwo: row.awayTeam.teamName,
+        teamTwoId: row.awayTeam.teamId,
         teamTwoOdds: odds.teamTwoOdds,
         matchDate: row.gameDateUTC,
     });
@@ -62,6 +50,11 @@ class MatchRepository {
             .filter(match => !teamName || match.homeTeam.teamName === teamName || match.awayTeam.teamName === teamName)
             .slice(page * pageSize, (page + 1) * pageSize)
             .map(match => mapRowToMatch(match, odds[match.gameId]));
+    }
+
+    async findById(id) {
+        const matches = await this.findAll({ gameId: id });
+        return matches && matches.length ? matches[0] : null;
     }
 }
 

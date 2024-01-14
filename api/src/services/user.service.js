@@ -2,7 +2,7 @@ const UserRepository = require('../repositories/user.repository');
 
 class UserService {
     constructor() {
-        this.userRepository = new UserRepository();
+        this.userRepository = UserRepository;
     }
 
     async createUser(userData) {
@@ -30,6 +30,20 @@ class UserService {
     async doesUsernameExist(username) {
         const user = await this.userRepository.findByUsername(username);
         return Boolean(user);
+    }
+
+    async getUserDetails(userId) {
+        const user = await this.userRepository.findById(userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return {
+            currency: user.currency,
+            betsWon: user.betsWon,
+            betsLost: user.betsLost
+        };
     }
 }
 

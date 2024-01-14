@@ -73,6 +73,23 @@ class UserRepository {
             throw new Error('Error fetching user by username: ' + error.message);
         }
     }
+
+    async findById(userId) {
+        try {
+            const result = await db.query('SELECT * FROM users WHERE userId = $1', [userId]);
+            return result.rows && result.rows.length ? mapRowToUser(result.rows[0]) : null;
+        } catch (error) {
+            throw new Error('Error fetching user by id: ' + error.message);
+        }
+    }
+
+    async updateCurrency(userId, currency) {
+        try {
+            await db.query('UPDATE users SET currency = $1 WHERE userId = $2', [currency, userId]);
+        } catch (error) {
+            throw new Error('Error updating user currency: ' + error.message);
+        }
+    }
 }
 
-module.exports = UserRepository;
+module.exports = new UserRepository();
