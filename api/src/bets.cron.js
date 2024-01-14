@@ -26,16 +26,16 @@ async function processBets() {
         for (const bet of pendingBets) {
             const match = schedule.find(game => game.gameId === bet.game_id);
 
-            if (match && match.gameStatus === 1) {
+            if (match && match.gameStatus === 3) {
                 const winningTeam = match.homeTeam.score > match.awayTeam.score ? match.homeTeam.teamId : match.awayTeam.teamId;
                 const betWon = winningTeam.toString() === bet.team_id.toString();
                 const resultState = betWon ? 'WON' : 'LOST';
-                const winnings = betWon ? bet.currency_bet * bet.odds_bet_with : 0;
+                const winnings = Number(bet.currency_bet) * Number(bet.odds_bet_with);
 
                 await betRepository.updateBetState(bet.id, resultState);
 
                 const user = await userRepository.findById(bet.user_id);
-                await userRepository.updateUserAfterBet(user.userId, winnings, betWon);
+                await userRepository.updateUserAfterBet(user.userId, Number(winnings), betWon);
 
                 console.log(`Bet ${bet.id} processed. User ${user.username} ${betWon ? 'won' : 'lost'} ${winnings} currency.`);
             }
@@ -45,21 +45,21 @@ async function processBets() {
     }
 }
 
-const scheduleBetProcessing = () => {
-    cron.schedule('0 0 * * *', async () => {
-        console.log('Running daily bet processing task');
-        await processBets();
-        console.log('Bet processing task finished.');
-    });
-}
-
 // const scheduleBetProcessing = () => {
-//     cron.schedule('*/10 * * * * *', async () => {
-//         console.log('Running bet processing task every 10 seconds');
+//     cron.schedule('0 0 * * *', async () => {
+//         console.log('Running daily bet processing task');
 //         await processBets();
 //         console.log('Bet processing task finished.');
 //     });
-// };
+// }
+
+const scheduleBetProcessing = () => {
+    cron.schedule('*/10 * * * * *', async () => {
+        console.log('Running bet processing task every 10 seconds');
+        await processBets();
+        console.log('Bet processing task finished.');
+    });
+};
 
 
 module.exports = scheduleBetProcessing;

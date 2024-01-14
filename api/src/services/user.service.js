@@ -45,6 +45,14 @@ class UserService {
             betsLost: user.betsLost
         };
     }
+
+    async getLeaderboard(options) {
+        return await this.userRepository.getLeaderboard(options);
+    }
+
+    async getUserPlacing(userId) {
+        return await this.userRepository.getUserPlacing(userId);
+    }
 }
 
 module.exports = new UserService();

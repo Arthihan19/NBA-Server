@@ -94,16 +94,46 @@ class UserRepository {
     async updateUserAfterBet(userId, winnings, betWon) {
         try {
             const user = await this.findById(userId);
-            const currency = user.currency;
+            const currency = Number(user.currency);
             if (betWon) {
                 const newCurrency = currency + winnings;
-                await db.query('UPDATE users SET currency = $1, bets_won = bets_won + 1 WHERE userId = $2', [newCurrency, userId]);
+                await db.query('UPDATE users SET currency = $1, bets_won = bets_won + 1 WHERE userId = $2', [newCurrency.toString(), userId]);
             } else {
                 const newCurrency = currency - winnings;
-                await db.query('UPDATE users SET currency = $1, bets_lost = bets_lost + 1 WHERE userId = $2', [newCurrency, userId]);
+                await db.query('UPDATE users SET currency = $1, bets_lost = bets_lost + 1 WHERE userId = $2', [newCurrency.toString(), userId]);
             }
         } catch (error) {
             throw new Error('Error updating user currency: ' + error.message);
+        }
+    }
+
+    async getLeaderboard({ page = 0, pageSize = 10 }) {
+        try {
+            const offset = page * pageSize;
+            const leaderboardQuery = `
+                SELECT username, currency, bets_won, bets_lost, ROW_NUMBER() OVER (ORDER BY currency DESC) as placing
+                FROM users
+                ORDER BY currency DESC
+                LIMIT $1 OFFSET $2
+            `;
+            const leaderboardResult = await db.query(leaderboardQuery, [pageSize, offset]);
+            return leaderboardResult.rows;
+        } catch (error) {
+            throw new Error('Error fetching leaderboard: ' + error.message);
+        }
+    }
+
+    async getUserPlacing(userId) {
+        try {
+            const placingQuery = `
+                SELECT COUNT(*) + 1 as placing
+                FROM users
+                WHERE currency > (SELECT currency FROM users WHERE userId = $1)
+            `;
+            const placingResult = await db.query(placingQuery, [userId]);
+            return placingResult.rows[0].placing;
+        } catch (error) {
+            throw new Error('Error fetching user placing: ' + error.message);
         }
     }
 }
