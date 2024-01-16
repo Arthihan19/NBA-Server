@@ -11,6 +11,7 @@ module.exports = function() {
     authRouter.post('/signin', AuthController.signIn);
     authRouter.post('/refresh-token', AuthController.refreshToken);
     authRouter.get('/me', authToken, AuthController.getMe);
+    authRouter.post('/logout', authToken, AuthController.logout);
 
     return authRouter;
 };

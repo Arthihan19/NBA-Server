@@ -14,7 +14,8 @@ const {processBets} = require("./bets.cron");
 const app = express();
 
 let corsOptions = {
-    origin: "http://localhost:8080"
+    origin: "http://localhost:3000",
+    credentials: true,
 };
 
 app.use(cors(corsOptions));

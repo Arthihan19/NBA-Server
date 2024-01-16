@@ -45,21 +45,21 @@ async function processBets() {
     }
 }
 
-// const scheduleBetProcessing = () => {
-//     cron.schedule('0 0 * * *', async () => {
-//         console.log('Running daily bet processing task');
-//         await processBets();
-//         console.log('Bet processing task finished.');
-//     });
-// }
-
 const scheduleBetProcessing = () => {
-    cron.schedule('*/10 * * * * *', async () => {
-        console.log('Running bet processing task every 10 seconds');
+    cron.schedule('0 0 * * *', async () => {
+        console.log('Running daily bet processing task');
         await processBets();
         console.log('Bet processing task finished.');
     });
-};
+}
+
+// const scheduleBetProcessing = () => {
+//     cron.schedule('*/10 * * * * *', async () => {
+//         console.log('Running bet processing task every 10 seconds');
+//         await processBets();
+//         console.log('Bet processing task finished.');
+//     });
+// };
 
 
 module.exports = scheduleBetProcessing;

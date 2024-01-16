@@ -40,6 +40,8 @@ class UserService {
         }
 
         return {
+            id: user.userId,
+            username: user.username,
             currency: user.currency,
             betsWon: user.betsWon,
             betsLost: user.betsLost
