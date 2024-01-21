@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "./scripts/prepare.sh ./node_modules/.bin/nodemon server.js",
-    "start": "./scripts/prepare.sh node server.js",
+    "start": "node server.js",
     "test": "./scripts/prepare.sh echo \\\"Error: no test specified\\\" && exit 1"
   },
   "author": "",
