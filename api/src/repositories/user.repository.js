@@ -56,8 +56,8 @@ class UserRepository {
             const hashedPassword = bcrypt.hashSync(password, salt);
 
             const result = await db.query(
-                'INSERT INTO users (username, password, salt) VALUES ($1, $2, $3) RETURNING *',
-                [username, hashedPassword, salt]
+                'INSERT INTO users (username, password, salt, currency) VALUES ($1, $2, $3, $4) RETURNING *',
+                [username, hashedPassword, salt, 1000]
             );
             return mapRowToUser(result.rows[0]);
         } catch (error) {
@@ -135,6 +135,14 @@ class UserRepository {
             return placingResult.rows[0].placing;
         } catch (error) {
             throw new Error('Error fetching user placing: ' + error.message);
+        }
+    }
+
+    async addDailyCurrencyToAllUsers(amount) {
+        try {
+            await db.query('UPDATE users SET currency = (CAST(currency AS NUMERIC) + $1)::VARCHAR', [amount]);
+        } catch (error) {
+            throw new Error('Error adding daily currency to all users: ' + error.message);
         }
     }
 }

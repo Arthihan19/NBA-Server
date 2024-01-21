@@ -53,6 +53,18 @@ const scheduleBetProcessing = () => {
     });
 }
 
+const scheduleDailyCurrencyUpdate = () => {
+    cron.schedule('0 0 * * *', async () => {
+        console.log('Running daily currency update task');
+        try {
+            await UserRepository.addDailyCurrencyToAllUsers(1000);
+            console.log('Daily currency update task finished.');
+        } catch (error) {
+            console.error('Error during daily currency update: ', error.message);
+        }
+    });
+}
+
 // const scheduleBetProcessing = () => {
 //     cron.schedule('*/10 * * * * *', async () => {
 //         console.log('Running bet processing task every 10 seconds');
@@ -62,4 +74,4 @@ const scheduleBetProcessing = () => {
 // };
 
 
-module.exports = scheduleBetProcessing;
+module.exports = { scheduleBetProcessing, scheduleDailyCurrencyUpdate };

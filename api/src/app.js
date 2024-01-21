@@ -2,7 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
-const scheduleBetProcessing = require('./bets.cron');
+const {scheduleBetProcessing, scheduleDailyCurrencyUpdate} = require('./bets.cron');
 const errorHandler = require('./middlewares/error-handler.middleware');
 
 const index = require('./routes/index');
@@ -25,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 scheduleBetProcessing();
+scheduleDailyCurrencyUpdate();
 
 // Public routes
 app.use(index);
