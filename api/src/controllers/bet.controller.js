@@ -19,20 +19,35 @@ class BetController {
 
     placeBet = this.asyncWrapper(async (req, res) => {
         const userId = req.user.id;
-        const { gameId, teamId, betAmount, odds } = req.body;
+        const betsArray = req.body;
 
-        const bet = await this.betService.placeBet({ userId, gameId, teamId, betAmount, odds });
-        res.status(201).json(bet);
+        const placedBets = [];
+
+        for (const bet of betsArray) {
+            const placedBet = await this.betService.placeBet({
+                userId,
+                gameId: bet.gameId,
+                teamId: bet.teamId,
+                betAmount: bet.betAmount,
+                odds: bet.odds
+            });
+
+            placedBets.push(placedBet);
+        }
+
+        res.status(201).json(placedBets);
     });
 
     getBetsByUser = this.asyncWrapper(async (req, res) => {
         const userId = req.user.id;
-        const { state, page, pageSize } = req.query;
+        const { state, page, pageSize, beforeDate, afterDate } = req.query;
 
         const options = {
             state,
             page: page ? parseInt(page, 10) : 0,
-            pageSize: pageSize ? Math.min(parseInt(pageSize, 10), 100) : 20
+            pageSize: pageSize ? Math.min(parseInt(pageSize, 10), 100) : 20,
+            beforeDate,
+            afterDate
         };
 
         const bets = await this.betService.findBetsByUser(userId, options);
@@ -41,7 +56,7 @@ class BetController {
 
     getLeaderboard = async (req, res) => {
         try {
-            const userId = req.user.id; // Assuming you get the user ID from the request
+            const userId = req.user.id;
             const { page, pageSize } = req.query;
 
             const leaderboard = await this.userService.getLeaderboard({ page, pageSize });

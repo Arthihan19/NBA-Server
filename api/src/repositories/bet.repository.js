@@ -66,7 +66,7 @@ class BetRepository {
         }
     }
 
-    async findBetsByUser(userId, { state = null, page = 0, pageSize = 20 }) {
+    async findBetsByUser(userId, {state = null, page = 0, pageSize = 20, beforeDate, afterDate}) {
         try {
             const offset = page * pageSize;
             let params = [userId];
@@ -81,8 +81,35 @@ class BetRepository {
 
             params.push(pageSize, offset);
 
-            const result = await db.query(query, params);
-            return result.rows.map(mapRowToBet);
+            const results = await db.query(query, params);
+
+            const resultsMappedToRow = results.rows.map(mapRowToBet);
+
+            const finalResponse = []
+
+            for (const bet of resultsMappedToRow) {
+                const match = await this.matchRepository.findById(bet.game_id);
+
+                if ((beforeDate && new Date(match.matchDate) > new Date(beforeDate)) || (afterDate && new Date(match.matchDate) < new Date(afterDate))) {
+                    continue;
+                }
+
+                finalResponse.push({
+                    id: bet.id,
+                    teamOne: match.teamOne,
+                    teamOneId: match.teamOneId,
+                    teamOneOdds: match.teamOneOdds,
+                    teamTwo: match.teamTwo,
+                    teamTwoId: match.teamTwoId,
+                    teamTwoOdds: match.teamTwoOdds,
+                    matchDate: match.matchDate,
+                    betAmount: bet.currency_bet,
+                    betTeamId: bet.team_id,
+                    state: bet.state
+                })
+            }
+
+            return finalResponse;
         } catch (error) {
             throw new APIError(500, 'Error fetching bets by user: ' + error.message);
         }
