@@ -9,7 +9,6 @@ const index = require('./routes/index');
 const matchRouter = require("./routes/match.router");
 const authRouter = require("./routes/auth.router");
 const betRoutes = require('./routes/bet.router');
-const {processBets} = require("./bets.cron");
 
 const app = express();
 

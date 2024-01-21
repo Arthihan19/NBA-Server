@@ -25,7 +25,7 @@ async function authToken(req, res, next) {
         try {
             const newAccessToken = await refreshAccessToken(refreshToken);
 
-            res.cookie('accessToken', newAccessToken, { httpOnly: true, sameSite: 'strict' });
+            res.cookie('accessToken', newAccessToken, { httpOnly: true, sameSite: 'none', secure: true });
             const decodedToken = jwt.verify(newAccessToken, SECRET_KEY);
             req.user = { id: decodedToken.id, username: decodedToken.username };
             return next();

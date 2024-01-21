@@ -32,8 +32,8 @@ class AuthController {
 
         await UserService.saveRefreshToken(user.userId, refreshToken);
 
-        res.cookie('accessToken', accessToken, {httpOnly: true, sameSite: 'strict'});
-        res.cookie('refreshToken', refreshToken, {httpOnly: true, sameSite: 'strict'});
+        res.cookie('accessToken', accessToken, {httpOnly: true, sameSite: 'none', secure: true });
+        res.cookie('refreshToken', refreshToken, {httpOnly: true, sameSite: 'none', secure: true });
 
         res.status(201).send({
             message: "User registered successfully!",
@@ -60,8 +60,8 @@ class AuthController {
 
         await UserService.saveRefreshToken(user.userId, refreshToken);
 
-        res.cookie('accessToken', accessToken, {httpOnly: true, sameSite: 'strict'});
-        res.cookie('refreshToken', refreshToken, {httpOnly: true, sameSite: 'strict'});
+        res.cookie('accessToken', accessToken, {httpOnly: true, sameSite: 'none', secure: true });
+        res.cookie('refreshToken', refreshToken, {httpOnly: true, sameSite: 'none', secure: true });
 
         res.status(200).send({
             id: user.userId,
@@ -77,7 +77,7 @@ class AuthController {
             const refreshToken = req.cookies['refreshToken'];
             const newAccessToken = await refreshAccessToken(refreshToken);
 
-            res.cookie('accessToken', newAccessToken, {httpOnly: true, sameSite: 'strict'});
+            res.cookie('accessToken', newAccessToken, {httpOnly: true, sameSite: 'none', secure: true });
             res.status(200).send({accessToken: newAccessToken});
 
         } catch (error) {
