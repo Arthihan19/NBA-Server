@@ -5,8 +5,8 @@ class BetService {
         this.betRepository = BetRepository;
     }
 
-    async placeBet(betData) {
-        return await this.betRepository.placeBet(betData);
+    async placeBets(userId, betsArray) {
+        return await this.betRepository.placeBets(userId, betsArray);
     }
 
     async findBetsByUser(userId, options) {

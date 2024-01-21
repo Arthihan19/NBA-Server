@@ -23,47 +23,70 @@ class BetRepository {
         this.userRepository = UserRepository;
     }
 
-    async placeBet({userId, gameId, teamId, betAmount, odds}) {
+    async placeBets(userId, betsArray) {
         const user = await this.userRepository.findById(userId);
+        if (!user) throw new APIError(404, 'User not found');
+        const userCurrency = Number(user.currency);
 
+        const totalBetAmount = betsArray.reduce((sum, bet) => sum + Number(bet.betAmount), 0);
+
+        if (userCurrency < totalBetAmount) {
+            throw new APIError(400, 'Insufficient funds for the total bet amount');
+        }
+
+        if (totalBetAmount <= 0) {
+            throw new APIError(400, 'Bet amount must be greater than 0');
+        }
+
+        const placedBets = [];
+        await db.query('BEGIN');
+        try {
+            for (const bet of betsArray) {
+                const placedBet = await this.placeSingleBet(userId, bet);
+                placedBets.push(placedBet);
+            }
+            await db.query('COMMIT');
+            return placedBets;
+        } catch (error) {
+            await db.query('ROLLBACK');
+            throw new APIError(error.statusCode || 500, 'Error placing bets: ' + error.message);
+        }
+    }
+
+    async placeSingleBet(userId, {gameId, teamId, betAmount, odds}) {
+        const user = await this.userRepository.findById(userId);
         const currencyAsNumber = Number(user.currency);
         const betAmountAsNumber = Number(betAmount);
 
-        if (!user || currencyAsNumber < betAmountAsNumber) {
-            throw new APIError(400, 'Insufficient funds');
-        }
-
         const match = await this.matchRepository.findById(gameId);
-        if (!match || (odds && (match.teamOneOdds !== odds && match.teamTwoOdds !== odds))) {
+
+        const TOLERANCE = 0.001;
+
+        const isOddsMatch = (odds1, odds2) => {
+            return Math.abs(odds1 - odds2) < TOLERANCE;
+        };
+
+        if (!match || (odds && !isOddsMatch(match.teamOneOdds, odds) && !isOddsMatch(match.teamTwoOdds, odds))) {
             throw new APIError(400, 'Match not available or odds mismatch');
         }
 
-        try {
-            const newBet = new Bet({
-                game_id: gameId,
-                user_id: userId,
-                team_id: teamId,
-                odds_bet_with: odds,
-                currency_bet: betAmount,
-                state: 'PENDING'
-            });
+        const newBet = new Bet({
+            game_id: gameId,
+            user_id: userId,
+            team_id: teamId,
+            odds_bet_with: odds,
+            currency_bet: betAmount,
+            state: 'PENDING'
+        });
 
-            await db.query('BEGIN');
+        await this.userRepository.updateCurrency(userId, currencyAsNumber - betAmountAsNumber);
 
-            await this.userRepository.updateCurrency(userId, currencyAsNumber - betAmountAsNumber);
+        const result = await db.query(
+            'INSERT INTO bets (game_id, user_id, team_id, odds_bet_with, currency_bet, state) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [newBet.game_id, newBet.user_id, newBet.team_id, newBet.odds_bet_with, newBet.currency_bet, newBet.state]
+        );
 
-            const result = await db.query(
-                'INSERT INTO bets (game_id, user_id, team_id, odds_bet_with, currency_bet, state) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-                [newBet.game_id, newBet.user_id, newBet.team_id, newBet.odds_bet_with, newBet.currency_bet, newBet.state]
-            );
-
-            await db.query('COMMIT');
-
-            return mapRowToBet(result.rows[0]);
-        } catch (error) {
-            await db.query('ROLLBACK');
-            throw new APIError(500, 'Error placing bet: ' + error.message);
-        }
+        return result.rows[0];
     }
 
     async findBetsByUser(userId, {state = null, page = 0, pageSize = 20, beforeDate, afterDate}) {

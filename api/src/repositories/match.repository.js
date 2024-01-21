@@ -9,7 +9,7 @@ const mapRowToMatch = (row, odds = {teamOneOdds: null, teamTwoOdds: null}) => {
         teamOneOdds: odds.teamOneOdds ? odds.teamOneOdds : null,
         teamTwo: row.awayTeam.teamCity + " " + row.awayTeam.teamName,
         teamTwoId: row.awayTeam.teamId,
-        teamTwoOdds: odds.teamTwoOdds? odds.teamTwoOdds : null,
+        teamTwoOdds: odds.teamTwoOdds ? odds.teamTwoOdds : null,
         matchDate: row.gameDateUTC,
     });
 };
@@ -77,8 +77,12 @@ class MatchRepository {
     }
 
     async findById(id) {
-        const matches = await this.findAll({gameId: id});
-        return matches && matches.length ? matches[0] : null;
+        const matches = await this.fetchAllMatches();
+        const odds = await this.fetchOdds();
+
+        return matches
+            .filter(match => match.gameId === id)
+            .map(match => mapRowToMatch(match, odds[match.gameId]))[0];
     }
 }
 

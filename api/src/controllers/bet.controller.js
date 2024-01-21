@@ -21,26 +21,17 @@ class BetController {
         const userId = req.user.id;
         const betsArray = req.body;
 
-        const placedBets = [];
-
-        for (const bet of betsArray) {
-            const placedBet = await this.betService.placeBet({
-                userId,
-                gameId: bet.gameId,
-                teamId: bet.teamId,
-                betAmount: bet.betAmount,
-                odds: bet.odds
-            });
-
-            placedBets.push(placedBet);
+        try {
+            const placedBets = await this.betService.placeBets(userId, betsArray);
+            res.status(201).json(placedBets);
+        } catch (error) {
+            res.status(error.statusCode || 500).json({message: error.message});
         }
-
-        res.status(201).json(placedBets);
     });
 
     getBetsByUser = this.asyncWrapper(async (req, res) => {
         const userId = req.user.id;
-        const { state, page, pageSize, beforeDate, afterDate } = req.query;
+        const {state, page, pageSize, beforeDate, afterDate} = req.query;
 
         const options = {
             state,
@@ -57,9 +48,9 @@ class BetController {
     getLeaderboard = async (req, res) => {
         try {
             const userId = req.user.id;
-            const { page, pageSize } = req.query;
+            const {page, pageSize} = req.query;
 
-            const leaderboard = await this.userService.getLeaderboard({ page, pageSize });
+            const leaderboard = await this.userService.getLeaderboard({page, pageSize});
             const userPlacing = await this.userService.getUserPlacing(userId);
             const userStats = leaderboard.find(user => user.userId === userId);
 
@@ -69,7 +60,7 @@ class BetController {
                 userPlacing
             });
         } catch (error) {
-            res.status(500).send({ message: 'Error fetching leaderboard: ' + error.message });
+            res.status(500).send({message: 'Error fetching leaderboard: ' + error.message});
         }
     };
 }

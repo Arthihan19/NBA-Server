@@ -111,11 +111,12 @@ class UserRepository {
         try {
             const offset = page * pageSize;
             const leaderboardQuery = `
-                SELECT username, currency, bets_won, bets_lost, ROW_NUMBER() OVER (ORDER BY currency DESC) as placing
-                FROM users
-                ORDER BY currency DESC
-                LIMIT $1 OFFSET $2
-            `;
+            SELECT username, currency, bets_won, bets_lost,
+            RANK() OVER (ORDER BY CAST(currency AS NUMERIC) DESC) as placing
+            FROM users
+            ORDER BY CAST(currency AS NUMERIC) DESC
+            LIMIT $1 OFFSET $2
+        `;
             const leaderboardResult = await db.query(leaderboardQuery, [pageSize, offset]);
             return leaderboardResult.rows;
         } catch (error) {
