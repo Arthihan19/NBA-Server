@@ -14,7 +14,7 @@ const {processBets} = require("./bets.cron");
 const app = express();
 
 let corsOptions = {
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL ? process.env.CLIENT_URL : "http://localhost:3000",
     credentials: true,
 };
 
