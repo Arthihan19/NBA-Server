@@ -45,25 +45,36 @@ async function processBets() {
     }
 }
 
-const scheduleBetProcessing = () => {
-    cron.schedule('0 0 * * *', async () => {
-        console.log('Running daily bet processing task');
+const scheduleBetProcessing = async () => {
+    await processBets();
+    console.log('Initial bet processing task finished.');
+
+    cron.schedule('*/30 * * * *', async () => {
+        console.log('Running bet processing task every 30 minutes');
         await processBets();
         console.log('Bet processing task finished.');
     });
 }
 
-const scheduleDailyCurrencyUpdate = () => {
-    cron.schedule('0 0 * * *', async () => {
-        console.log('Running daily currency update task');
+const scheduleDailyCurrencyUpdate = async () => {
+    try {
+        await UserRepository.addDailyCurrencyToAllUsers(1000);
+        console.log('Initial currency update task finished.');
+    } catch (error) {
+        console.error('Error during initial currency update: ', error.message);
+    }
+
+    cron.schedule('*/30 * * * *', async () => {
+        console.log('Running currency update task every 30 minutes');
         try {
-            await UserRepository.addDailyCurrencyToAllUsers(1000);
-            console.log('Daily currency update task finished.');
+            await UserRepository.addDailyCurrencyToAllUsers(100);
+            console.log('Currency update task finished.');
         } catch (error) {
-            console.error('Error during daily currency update: ', error.message);
+            console.error('Error during currency update: ', error.message);
         }
     });
 }
+
 
 // const scheduleBetProcessing = () => {
 //     cron.schedule('*/10 * * * * *', async () => {
