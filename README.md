@@ -22,7 +22,7 @@ And the backend is hosted here: TODO
 
 * [Frontend tech stack](https://github.com/Arthihan19/NBA-Client)
 * [NPM](https://www.npmjs.com/)
-* [Node js]([Node.js](https://nodejs.org/en))
+* [Node.js](https://nodejs.org/en)
 * [Express](https://expressjs.com/)
 * [Postgresql](https://www.postgresql.org/)
 * [Docker](https://www.docker.com/) & [docker compose](https://docs.docker.com/compose/)
